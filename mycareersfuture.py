@@ -10,6 +10,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from datetime import date
 
 __author__ = "Fan Lang"
 __email__ = "a0099409@u.nus.edu"
@@ -18,8 +19,10 @@ class Downloader(object):
 
     def __init__(self):
         self.server = "https://www.mycareersfuture.gov.sg"
-        self.keyword = "/search?search=Java"
-        self.min_salary = "&salary=5500"
+        self.search = "/search?search="
+        self.keyword = "Java"
+        self.min_salary = "5500"
+        self.salary_query = "&salary="
         self.target = "&sortBy=new_posting_date&page="
         self.num = 0
         self.company = []
@@ -33,7 +36,7 @@ class Downloader(object):
 
         for x in range(0, 151):  # auto-open 151 webpages to exact job openings' info
             driver = webdriver.Chrome()  # launch chromedriver
-            url = self.server + self.keyword + self.min_salary + self.target + str(x)
+            url = self.server + self.search + self.keyword + self.salary_query + self.min_salary + self.target + str(x)
             driver.get(url)
             timeout = 3  # second
             try:
@@ -70,8 +73,10 @@ class Downloader(object):
                 application = each.find("div", "w-100 pt3 flex dn-l justify-between").get_text(";")  # parse each job opening's applicant number
                 self.applicant.append(application)
 
+            file_name = self.keyword + "_" + self.min_salary + "_" + str(date.today()) + ".txt"
+
             for i in range(self.num, len(dl.url[:])):  # write each job openings into a txt file
-                dl.writer("joblisting_5500_0831v5.txt", dl.url[i], dl.company[i], dl.title[i], dl.detail[i], dl.salary[i], dl.applicant[i])
+                dl.writer(file_name, dl.url[i], dl.company[i], dl.title[i], dl.detail[i], dl.salary[i], dl.applicant[i])
                 sys.stdout.flush()
 
             print("Done written index " + str(self.num) + " to " + str(len(dl.url[:]) - 1))  # System output successful message upon processing of each webpages are done
